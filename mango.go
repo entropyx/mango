@@ -14,10 +14,6 @@ import (
 
 var clientKey = &mongo.Client{}
 
-func Register() {
-
-}
-
 func SetContext(c context.Context, model interface{}) error {
 	doc, err := getDocument(model)
 	if err != nil {
@@ -25,16 +21,6 @@ func SetContext(c context.Context, model interface{}) error {
 	}
 	doc.Context = c
 	return nil
-}
-
-func UpsertOne(filter interface{}, model interface{}) error {
-	bsonDoc := toBsonDoc(model)
-	doc, err := getDocument(model)
-	if err != nil {
-		return err
-	}
-	client := doc.Context.Value(clientKey).(*mongo.Client)
-	client.Database(getCollection(model))
 }
 
 func getContextFromModel(model interface{}) (context.Context, error) {
