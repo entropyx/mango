@@ -23,7 +23,8 @@ type Config struct {
 }
 
 type Connection struct {
-	client *mongo.Client
+	client   *mongo.Client
+	database string
 }
 
 func Connect(config *Config) (*Connection, error) {
@@ -39,16 +40,21 @@ func Connect(config *Config) (*Connection, error) {
 	if err != nil {
 		return nil, err
 	}
-	connection := &Connection{client}
+	connection := &Connection{client: client, database: config.Database}
 	return connection, nil
 }
 
-func (c *Connection) UpsertOne(filter interface{}, model interface{}) error {
+func (c *Connection) UpdateOne(filter interface{}, model interface{}) error {
 	bsonDoc := toBsonDoc(model)
 	doc, err := getDocument(model)
 	if err != nil {
 		return err
 	}
-	client := doc.Context.Value(clientKey).(*mongo.Client)
-	client.Database(getCollection(model))
+	collection := c.collection(model)
+	collection.UpdateOne(ctx, filter, update)
+}
+
+func (c *Connection) collection(model interface{}) *mongo.Collection {
+	client := c.client
+	return client.Database(c.database).Collection(getCollection(model))
 }
