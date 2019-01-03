@@ -6,12 +6,13 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/entropyx/mango/options"
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
+	opts "github.com/mongodb/mongo-go-driver/mongo/options"
 )
 
 type Config struct {
-	options.ClientOptions
+	options.Client
 	Address  string
 	Port     uint
 	Timeout  *time.Time
@@ -52,11 +53,10 @@ func (c *Connection) Register(ctx context.Context, models ...interface{}) {
 	}
 }
 
-func UpdateOne(filter interface{}, operator *Operator) error {
-
+func UpdateOne(filter interface{}, operator *Operator, op options.Update) error {
 	doc := getDocument(operator.Value)
 	collection := doc.collection(operator.Value)
-	_, err := collection.UpdateOne(doc.Context, filter, operator.apply())
+	_, err := collection.UpdateOne(doc.Context, filter, operator.apply(), &opts.UpdateOptions{Upsert: &op.Upsert})
 	return err
 }
 

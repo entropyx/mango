@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/entropyx/mango/options"
 	"github.com/mongodb/mongo-go-driver/bson"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -48,7 +49,7 @@ func TestUpsertOne(t *testing.T) {
 		s := &TestStruct{A: "1", Child: &TestStruct{A: "2"}}
 		conn.Register(context.Background(), s)
 		Convey("When it is upserted", func() {
-			err := UpdateOne(bson.D{{"name", "Ash"}}, Set(s))
+			err := UpdateOne(bson.D{{"name", "Ash"}}, Set(s), options.Update{Upsert: true})
 
 			Convey("err should be nil", func() {
 				So(err, ShouldBeNil)
