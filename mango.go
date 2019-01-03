@@ -5,10 +5,12 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/entropyx/mango/options"
 	"github.com/entropyx/tools/reflectutils"
 	"github.com/entropyx/tools/strutils"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo"
+	opts "github.com/mongodb/mongo-go-driver/mongo/options"
 )
 
 var clientKey = &mongo.Client{}
@@ -17,6 +19,13 @@ func SetContext(c context.Context, model interface{}) error {
 	doc := getDocument(model)
 	doc.Context = c
 	return nil
+}
+
+func UpdateOne(filter interface{}, operator *Operator, op options.Update) error {
+	doc := getDocument(operator.Value)
+	collection := doc.collection(operator.Value)
+	_, err := collection.UpdateOne(doc.Context, filter, operator.apply(), &opts.UpdateOptions{Upsert: &op.Upsert})
+	return err
 }
 
 func getContextFromModel(model interface{}) context.Context {

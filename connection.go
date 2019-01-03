@@ -8,7 +8,6 @@ import (
 
 	"github.com/entropyx/mango/options"
 	"github.com/mongodb/mongo-go-driver/mongo"
-	opts "github.com/mongodb/mongo-go-driver/mongo/options"
 )
 
 type Config struct {
@@ -51,13 +50,6 @@ func (c *Connection) Register(ctx context.Context, models ...interface{}) {
 		doc := getDocument(model)
 		doc.Context = newCtx
 	}
-}
-
-func UpdateOne(filter interface{}, operator *Operator, op options.Update) error {
-	doc := getDocument(operator.Value)
-	collection := doc.collection(operator.Value)
-	_, err := collection.UpdateOne(doc.Context, filter, operator.apply(), &opts.UpdateOptions{Upsert: &op.Upsert})
-	return err
 }
 
 func (c *Connection) collection(model interface{}) *mongo.Collection {
