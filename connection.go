@@ -31,7 +31,7 @@ func Connect(config *Config) (*Connection, error) {
 	u := url.URL{
 		Scheme: "mongodb",
 		User:   url.UserPassword(config.Username, config.Password),
-		Host:   fmt.Sprintf("%s:%s", config.Address, config.Port),
+		Host:   fmt.Sprintf("%s:%d", config.Address, config.Port),
 	}
 	if config.Context == nil {
 		config.Context = context.Background()
@@ -44,14 +44,20 @@ func Connect(config *Config) (*Connection, error) {
 	return connection, nil
 }
 
-func (c *Connection) UpdateOne(filter interface{}, model interface{}) error {
-	bsonDoc := toBsonDoc(model)
-	doc, err := getDocument(model)
-	if err != nil {
-		return err
+func (c *Connection) Register(ctx context.Context, models ...interface{}) {
+	newCtx := context.WithValue(ctx, "connection", c)
+	for _, model := range models {
+		doc := getDocument(model)
+		doc.Context = newCtx
 	}
-	collection := c.collection(model)
-	collection.UpdateOne(ctx, filter, update)
+}
+
+func UpdateOne(filter interface{}, operator *Operator) error {
+
+	doc := getDocument(operator.Value)
+	collection := doc.collection(operator.Value)
+	_, err := collection.UpdateOne(doc.Context, filter, operator.apply())
+	return err
 }
 
 func (c *Connection) collection(model interface{}) *mongo.Collection {
