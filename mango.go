@@ -9,6 +9,7 @@ import (
 	"github.com/entropyx/tools/reflectutils"
 	"github.com/entropyx/tools/strutils"
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	opts "github.com/mongodb/mongo-go-driver/mongo/options"
 )
@@ -18,6 +19,27 @@ var clientKey = &mongo.Client{}
 func SetContext(c context.Context, model interface{}) error {
 	doc := getDocument(model)
 	doc.Context = c
+	return nil
+}
+
+func FindOne(filter interface{}, value interface{}, op *options.FindOne) error {
+	doc := getDocument(value)
+	collection := doc.collection(value)
+	// TODO: set to mongo options
+	result := collection.FindOne(doc.Context, filter, &opts.FindOneOptions{})
+	return result.Decode(value)
+}
+
+func InsertOne(value interface{}, op *options.InsertOne) error {
+	doc := getDocument(value)
+	collection := doc.collection(value)
+	// TODO: set to mongo options
+	result, err := collection.InsertOne(doc.Context, toBsonDoc(value))
+	if err != nil {
+		return err
+	}
+	id := result.InsertedID.(primitive.ObjectID)
+	doc.ID = id
 	return nil
 }
 

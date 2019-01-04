@@ -13,7 +13,7 @@ type D bson.D
 type M bson.M
 
 type Document struct {
-	ID      primitive.ObjectID
+	ID      primitive.ObjectID `bson:"_id"`
 	Context context.Context
 }
 

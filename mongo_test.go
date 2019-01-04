@@ -7,14 +7,15 @@ import (
 
 	"github.com/entropyx/mango/options"
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 type TestStruct struct {
-	Document
-	A     string
-	a     string
-	Child *TestStruct
+	Document `bson:",inline"`
+	A        string
+	a        string
+	Child    *TestStruct
 }
 
 func Test_getCollection(t *testing.T) {
@@ -44,19 +45,58 @@ func Test_toBsonDoc(t *testing.T) {
 	})
 }
 
-func TestUpsertOne(t *testing.T) {
-	Convey("Given a model", t, WithConnection(func(conn *Connection) {
+func TestInsertOne(t *testing.T) {
+	Convey("Given a document", t, WithConnection(func(conn *Connection) {
 		s := &TestStruct{A: "1", Child: &TestStruct{A: "2"}}
 		conn.Register(context.Background(), s)
-		Convey("When it is upserted", func() {
-			err := UpdateOne(bson.D{{"name", "Ash"}}, Set(s), options.Update{Upsert: true})
+
+		Convey("When it is inserted", func() {
+			err := InsertOne(s, &options.InsertOne{})
 
 			Convey("err should be nil", func() {
 				So(err, ShouldBeNil)
 			})
 
-			Convey("The id should be valid", func() {
+			Convey("The id should NOT be zero", func() {
+				So(s.ID.IsZero(), ShouldBeFalse)
+			})
+		})
+	}))
+}
 
+func TestUpsertOne(t *testing.T) {
+	Convey("Given a document", t, WithConnection(func(conn *Connection) {
+		s := &TestStruct{A: "1", Child: &TestStruct{A: "2"}}
+		conn.Register(context.Background(), s)
+
+		Convey("When it is upserted and it is NOT found", func() {
+			id := primitive.NewObjectID()
+			err := UpdateOne(bson.D{{"_id", id}}, Set(s), options.Update{Upsert: true})
+
+			Convey("err should be nil", func() {
+				So(err, ShouldBeNil)
+			})
+
+			Convey("The document should exist now", func() {
+				fs := &TestStruct{}
+				conn.Register(context.Background(), fs)
+				FindOne(bson.D{{"_id", id}}, fs, &options.FindOne{})
+				So(fs.ID.IsZero(), ShouldBeFalse)
+				So(fs.ID.Hex(), ShouldEqual, id.Hex())
+			})
+		})
+
+		Convey("When it is upserted and it is found", func() {
+			s := &TestStruct{A: "1", Child: &TestStruct{A: "2"}}
+			conn.Register(context.Background(), s)
+
+			InsertOne(s, &options.InsertOne{})
+
+			Convey("The document should exist now", func() {
+				fs := &TestStruct{}
+				conn.Register(context.Background(), fs)
+				FindOne(bson.D{{"_id", s.ID}}, fs, &options.FindOne{})
+				So(fs.ID.IsZero(), ShouldBeFalse)
 			})
 		})
 	}))
