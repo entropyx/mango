@@ -22,7 +22,7 @@ func SetContext(c context.Context, model interface{}) error {
 	return nil
 }
 
-func FindOne(filter interface{}, value interface{}, op *options.FindOne) error {
+func FindOne(filter interface{}, value interface{}, ops ...*options.FindOne) error {
 	doc := getDocument(value)
 	collection := doc.collection(value)
 	// TODO: set to mongo options
@@ -30,7 +30,7 @@ func FindOne(filter interface{}, value interface{}, op *options.FindOne) error {
 	return result.Decode(value)
 }
 
-func InsertOne(value interface{}, op *options.InsertOne) error {
+func InsertOne(value interface{}, ops ...*options.InsertOne) error {
 	doc := getDocument(value)
 	collection := doc.collection(value)
 	// TODO: set to mongo options
@@ -43,10 +43,14 @@ func InsertOne(value interface{}, op *options.InsertOne) error {
 	return nil
 }
 
-func UpdateOne(filter interface{}, operator *Operator, op options.Update) error {
+func UpdateOne(filter interface{}, operator *Operator, ops ...*options.Update) error {
+	var updateOptions []*opts.UpdateOptions
 	doc := getDocument(operator.Value)
 	collection := doc.collection(operator.Value)
-	_, err := collection.UpdateOne(doc.Context, filter, operator.apply(), &opts.UpdateOptions{Upsert: &op.Upsert})
+	for _, op := range ops {
+		updateOptions = append(updateOptions, &opts.UpdateOptions{Upsert: &op.Upsert})
+	}
+	_, err := collection.UpdateOne(doc.Context, filter, operator.apply(), updateOptions...)
 	return err
 }
 

@@ -51,7 +51,7 @@ func TestInsertOne(t *testing.T) {
 		conn.Register(context.Background(), s)
 
 		Convey("When it is inserted", func() {
-			err := InsertOne(s, &options.InsertOne{})
+			err := InsertOne(s)
 
 			Convey("err should be nil", func() {
 				So(err, ShouldBeNil)
@@ -71,7 +71,7 @@ func TestUpsertOne(t *testing.T) {
 
 		Convey("When it is upserted and it is NOT found", func() {
 			id := primitive.NewObjectID()
-			err := UpdateOne(bson.D{{"_id", id}}, Set(s), options.Update{Upsert: true})
+			err := UpdateOne(bson.D{{"_id", id}}, Set(s), &options.Update{Upsert: true})
 
 			Convey("err should be nil", func() {
 				So(err, ShouldBeNil)
@@ -80,7 +80,7 @@ func TestUpsertOne(t *testing.T) {
 			Convey("The document should exist now", func() {
 				fs := &TestStruct{}
 				conn.Register(context.Background(), fs)
-				FindOne(bson.D{{"_id", id}}, fs, &options.FindOne{})
+				FindOne(bson.D{{"_id", id}}, fs)
 				So(fs.ID.IsZero(), ShouldBeFalse)
 				So(fs.ID.Hex(), ShouldEqual, id.Hex())
 			})
@@ -95,7 +95,7 @@ func TestUpsertOne(t *testing.T) {
 			Convey("The document should exist now", func() {
 				fs := &TestStruct{}
 				conn.Register(context.Background(), fs)
-				FindOne(bson.D{{"_id", s.ID}}, fs, &options.FindOne{})
+				FindOne(bson.D{{"_id", s.ID}}, fs)
 				So(fs.ID.IsZero(), ShouldBeFalse)
 			})
 		})
