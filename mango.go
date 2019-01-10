@@ -67,16 +67,26 @@ func getCollection(i interface{}) string {
 	return snakedName
 }
 
+func arrayToBsonA(v reflect.Value) bson.A {
+	l := v.Len()
+	a := bson.A{}
+	for i := 0; i < l; i++ {
+		itemValue := v.Index(i)
+		deepValue := reflectutils.DeepValue(itemValue)
+		item := valueToBson(deepValue)
+		a = append(a, item)
+	}
+	return a
+}
+
 func structToBsonDoc(v reflect.Value) bson.D {
 	doc := bson.D{}
 	n := v.NumField()
 	t := v.Type()
 	for i := 0; i < n; i++ {
-		var newFieldValue interface{}
 		field := t.Field(i)
 		fieldName := field.Name
 		newFieldName := strutils.ToSnakeCase(fieldName)
-
 		fieldValue := v.Field(i)
 		if !fieldValue.CanInterface() {
 			continue
@@ -87,14 +97,7 @@ func structToBsonDoc(v reflect.Value) bson.D {
 			continue
 		}
 		deepValue := reflectutils.DeepValue(fieldValue)
-		switch deepValue.Kind() {
-		case reflect.Invalid:
-			newFieldValue = bson.D{}
-		case reflect.Struct:
-			newFieldValue = structToBsonDoc(deepValue)
-		default:
-			newFieldValue = deepValue.Interface()
-		}
+		newFieldValue := valueToBson(deepValue)
 		element := bson.E{newFieldName, newFieldValue}
 		doc = append(doc, element)
 	}
@@ -103,15 +106,20 @@ func structToBsonDoc(v reflect.Value) bson.D {
 
 func toBsonDoc(model interface{}) bson.D {
 	v := reflectutils.DeepValue(reflect.ValueOf(model))
-	return valueToBsonDoc(v)
+	return valueToBson(v).(bson.D)
 }
 
-func valueToBsonDoc(v reflect.Value) bson.D {
-	doc := bson.D{}
+func valueToBson(v reflect.Value) interface{} {
 	k := v.Kind()
 	switch k {
+	case reflect.Invalid:
+		return bson.D{}
 	case reflect.Struct:
-		doc = structToBsonDoc(v)
+		return structToBsonDoc(v)
+	case reflect.Array, reflect.Slice:
+		return arrayToBsonA(v)
+	default:
+		return v.Interface()
 	}
-	return doc
+	return bson.D{}
 }

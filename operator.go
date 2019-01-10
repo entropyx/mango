@@ -19,5 +19,6 @@ func Set(model interface{}) *Operator {
 }
 
 func (o *Operator) apply() bson.D {
+	fmt.Println("value", toBsonDoc(o.Value))
 	return bson.D{{fmt.Sprintf("$%s", o.Operator), toBsonDoc(o.Value)}}
 }

@@ -3,6 +3,7 @@ package mango
 import (
 	"context"
 	"reflect"
+	"time"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
@@ -13,8 +14,10 @@ type D bson.D
 type M bson.M
 
 type Document struct {
-	ID      primitive.ObjectID `bson:"_id"`
-	Context context.Context
+	ID        primitive.ObjectID `bson:"_id"`
+	CreatedAt *time.Time
+	UpdatedAt *time.Time
+	Context   context.Context
 }
 
 func (m *Document) SetContext(c context.Context) {
