@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/entropyx/mango/options"
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
 	. "github.com/smartystreets/goconvey/convey"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TestStruct struct {

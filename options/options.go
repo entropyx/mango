@@ -3,7 +3,7 @@ package options
 import (
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type CursorType int8
