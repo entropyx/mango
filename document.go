@@ -29,7 +29,7 @@ func (m *Document) GetContext() context.Context {
 }
 
 func (d *Document) Connection() *Connection {
-	v := d.Context.Value("connection")
+	v := d.Context.Value(keyConnection)
 	return v.(*Connection)
 }
 

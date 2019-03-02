@@ -15,6 +15,7 @@ import (
 )
 
 var clientKey = &mongo.Client{}
+var keyConnection *Connection
 
 func SetContext(c context.Context, model interface{}) error {
 	doc := getDocument(model)

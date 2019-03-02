@@ -48,7 +48,7 @@ func Connect(config *Config) (*Connection, error) {
 }
 
 func (c *Connection) Register(ctx context.Context, models ...interface{}) {
-	newCtx := context.WithValue(ctx, "connection", c)
+	newCtx := context.WithValue(ctx, keyConnection, c)
 	for _, model := range models {
 		doc := getDocument(model)
 		doc.Context = newCtx
