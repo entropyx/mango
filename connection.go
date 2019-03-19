@@ -29,11 +29,10 @@ type Connection struct {
 
 func Connect(config *Config) (*Connection, error) {
 	u := url.URL{
-		Scheme:   "mongodb",
-		User:     url.UserPassword(config.Username, config.Password),
-		Host:     fmt.Sprintf("%s:%d", config.Address, config.Port),
-		Path:     config.Database,
-		RawQuery: "authMechanism=SCRAM-SHA-1",
+		Scheme: "mongodb",
+		User:   url.UserPassword(config.Username, config.Password),
+		Host:   fmt.Sprintf("%s:%d", config.Address, config.Port),
+		Path:   config.Database,
 	}
 	if config.Context == nil {
 		config.Context = context.Background()
