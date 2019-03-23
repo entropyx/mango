@@ -33,7 +33,7 @@ func Connect(config *Config) (*Connection, error) {
 		User:     url.UserPassword(config.Username, config.Password),
 		Host:     fmt.Sprintf("%s:%d", config.Address, config.Port),
 		Path:     config.Database,
-		RawQuery: "authMechanism=SCRAM-SHA-1",
+		RawQuery: "authMechanism=SCRAM-SHA-1&authSource=" + config.Source,
 	}
 	if config.Context == nil {
 		config.Context = context.Background()
