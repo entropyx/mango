@@ -31,6 +31,17 @@ func FindOne(filter interface{}, value interface{}, ops ...*options.FindOne) err
 	return result.Decode(value)
 }
 
+func Find(filter interface{}, value interface{}) error {
+	doc := getDocument(value)
+	collection := doc.collection(value)
+	result, err := collection.Find(doc.Context, filter, &opts.FindOptions{})
+	if err != nil {
+		return err
+	}
+
+	return result.All(doc.Context, value)
+}
+
 func InsertOne(value interface{}, ops ...*options.InsertOne) error {
 	doc := getDocument(value)
 	collection := doc.collection(value)
@@ -52,6 +63,13 @@ func UpdateOne(filter interface{}, operator *Operator, ops ...*options.Update) e
 		updateOptions = append(updateOptions, &opts.UpdateOptions{Upsert: &op.Upsert})
 	}
 	_, err := collection.UpdateOne(doc.Context, filter, operator.apply(), updateOptions...)
+	return err
+}
+
+func DeleteOne(filter interface{}, value interface{}) error {
+	doc := getDocument(value)
+	collection := doc.collection(value)
+	_, err := collection.DeleteOne(doc.Context, filter, &opts.DeleteOptions{})
 	return err
 }
 
