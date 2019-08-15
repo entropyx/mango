@@ -55,6 +55,10 @@ func (c *Connection) Register(ctx context.Context, models ...interface{}) {
 	}
 }
 
+func (c *Connection) GetClient() *mongo.Client {
+	return c.client
+}
+
 func (c *Connection) collection(model interface{}) *mongo.Collection {
 	client := c.client
 	return client.Database(c.database).Collection(getCollection(model))
