@@ -5,9 +5,11 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/entropyx/mango/options"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	opts "go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type D bson.D
@@ -31,6 +33,20 @@ func (m *Document) GetContext() context.Context {
 func (d *Document) Connection() *Connection {
 	v := d.Context.Value(keyConnection)
 	return v.(*Connection)
+}
+
+func (d *Document) Find(filter interface{}, value interface{}, ops ...*options.Find) error {
+	var findOptions []*opts.FindOptions
+	collection := d.collection(value)
+	for _, op := range ops {
+		skip := (op.Page - 1) * op.Limit
+		findOptions = append(findOptions, &opts.FindOptions{Limit: &op.Limit, Skip: &skip})
+	}
+	result, err := collection.Find(d.Context, filter, findOptions...)
+	if err != nil {
+		return err
+	}
+	return result.All(d.Context, value)
 }
 
 func (d *Document) collection(model interface{}) *mongo.Collection {

@@ -23,23 +23,17 @@ func SetContext(c context.Context, model interface{}) error {
 	return nil
 }
 
+func Model(model interface{}) *Document {
+	doc := getDocument(model)
+	return doc
+}
+
 func FindOne(filter interface{}, value interface{}, ops ...*options.FindOne) error {
 	doc := getDocument(value)
 	collection := doc.collection(value)
 	// TODO: set to mongo options
 	result := collection.FindOne(doc.Context, filter, &opts.FindOneOptions{})
 	return result.Decode(value)
-}
-
-func Find(filter interface{}, value interface{}) error {
-	doc := getDocument(value)
-	collection := doc.collection(value)
-	result, err := collection.Find(doc.Context, filter, &opts.FindOptions{})
-	if err != nil {
-		return err
-	}
-
-	return result.All(doc.Context, value)
 }
 
 func InsertOne(value interface{}, ops ...*options.InsertOne) error {
