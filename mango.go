@@ -23,6 +23,11 @@ func SetContext(c context.Context, model interface{}) error {
 	return nil
 }
 
+func Model(model interface{}) *Document {
+	doc := getDocument(model)
+	return doc
+}
+
 func FindOne(filter interface{}, value interface{}, ops ...*options.FindOne) error {
 	doc := getDocument(value)
 	collection := doc.collection(value)
@@ -52,6 +57,20 @@ func UpdateOne(filter interface{}, operator *Operator, ops ...*options.Update) e
 		updateOptions = append(updateOptions, &opts.UpdateOptions{Upsert: &op.Upsert})
 	}
 	_, err := collection.UpdateOne(doc.Context, filter, operator.apply(), updateOptions...)
+	return err
+}
+
+func DeleteOne(filter interface{}, value interface{}) error {
+	doc := getDocument(value)
+	collection := doc.collection(value)
+	_, err := collection.DeleteOne(doc.Context, filter, &opts.DeleteOptions{})
+	return err
+}
+
+func DeleteMany(filter interface{}, value interface{}) error {
+	doc := getDocument(value)
+	collection := doc.collection(value)
+	_, err := collection.DeleteMany(doc.Context, filter, &opts.DeleteOptions{})
 	return err
 }
 
