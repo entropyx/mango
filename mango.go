@@ -67,6 +67,13 @@ func DeleteOne(filter interface{}, value interface{}) error {
 	return err
 }
 
+func DeleteMany(filter interface{}, value interface{}) error {
+	doc := getDocument(value)
+	collection := doc.collection(value)
+	_, err := collection.DeleteMany(doc.Context, filter, &opts.DeleteOptions{})
+	return err
+}
+
 func getContextFromModel(model interface{}) context.Context {
 	doc := getDocument(model)
 	return doc.Context
