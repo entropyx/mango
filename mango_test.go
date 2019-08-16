@@ -112,7 +112,7 @@ func WithConnection(f func(conn *Connection)) func() {
 		config := &Config{
 			Address:  os.Getenv("MONGO_HOST"),
 			Port:     27017,
-			Database: "test",
+			Database: os.Getenv("MONGO_DB"),
 			Username: os.Getenv("MONGO_USER"),
 			Password: os.Getenv("MONGO_PASS"),
 			Source:   os.Getenv("MONGO_SOURCE"),
