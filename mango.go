@@ -106,6 +106,9 @@ func structToBsonDoc(v reflect.Value) bson.D {
 	for i := 0; i < n; i++ {
 		field := t.Field(i)
 		fieldName := field.Name
+		if strings.Contains(string(field.Tag), `bson:"-"`) {
+			continue
+		}
 		newFieldName := strutils.ToSnakeCase(fieldName)
 		fieldValue := v.Field(i)
 		if !fieldValue.CanInterface() {
