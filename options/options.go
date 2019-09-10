@@ -50,3 +50,8 @@ type Collation struct {
 
 type InsertOne struct {
 }
+
+type Find struct {
+	Page  int64
+	Limit int64
+}
