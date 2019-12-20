@@ -31,7 +31,7 @@ func Connect(config *Config) (*Connection, error) {
 	u := url.URL{
 		Scheme:   "mongodb",
 		User:     url.UserPassword(config.Username, config.Password),
-		Host:     fmt.Sprintf("%s:%d", config.Address, config.Port),
+		Host:     hostString(config.Address, config.Port),
 		Path:     config.Database,
 		RawQuery: "authMechanism=SCRAM-SHA-1&authSource=" + config.Source,
 	}
@@ -62,4 +62,16 @@ func (c *Connection) GetClient() *mongo.Client {
 func (c *Connection) collection(model interface{}) *mongo.Collection {
 	client := c.client
 	return client.Database(c.database).Collection(getCollection(model))
+}
+
+func hostString(address string, port uint) string {
+	return fmt.Sprintf("%s%s", address, portString(port))
+}
+
+func portString(port uint) string {
+	s := ":%d"
+	if port > 0 {
+		return fmt.Sprintf(s, port)
+	}
+	return ""
 }
