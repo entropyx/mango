@@ -14,6 +14,7 @@ type Config struct {
 	options.Client
 	Address  string
 	Port     uint
+	Srv      bool
 	Timeout  *time.Time
 	Database string
 	Username string
@@ -28,8 +29,12 @@ type Connection struct {
 }
 
 func Connect(config *Config) (*Connection, error) {
+	scheme := "mongodb"
+	if config.Srv {
+		scheme += "+srv"
+	}
 	u := url.URL{
-		Scheme:   "mongodb",
+		Scheme:   scheme,
 		User:     url.UserPassword(config.Username, config.Password),
 		Host:     hostString(config.Address, config.Port),
 		Path:     config.Database,
