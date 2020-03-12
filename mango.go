@@ -151,12 +151,12 @@ func valueToBson(v reflect.Value) interface{} {
 func InsertMany(values interface{}) (*mongo.InsertManyResult, error) {
 	array := reflectutils.DeepValue(reflect.ValueOf(values))
 	if !isArray(array) || isEmptyArray(array) {
-		return nil, errors.New("invalid input value")
+		return nil, errors.New("invalid input. Must be non empty array or slice")
 	}
 
 	document := getMongoDocument(array)
 	if document.Context == nil {
-		return nil, errors.New("invalid connection")
+		return nil, errors.New("connection not registered in mongo document context")
 	}
 
 	collection := document.collection(values)
