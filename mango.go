@@ -2,6 +2,7 @@ package mango
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"strings"
 
@@ -145,4 +146,35 @@ func valueToBson(v reflect.Value) interface{} {
 		return v.Interface()
 	}
 	return bson.D{}
+}
+
+func InsertMany(values interface{}) (*mongo.InsertManyResult, error) {
+	array := reflectutils.DeepValue(reflect.ValueOf(values))
+	if !isArray(array) || isEmptyArray(array) {
+		return nil, errors.New("invalid input value")
+	}
+
+	document := getMongoDocument(array)
+	if document.Context == nil {
+		return nil, errors.New("invalid connection")
+	}
+
+	collection := document.collection(values)
+	bsonArray := arrayToBsonA(array)
+	return collection.InsertMany(document.Context, bsonArray)
+
+}
+
+func isArray(v reflect.Value) bool {
+	return v.Kind() == reflect.Array || v.Kind() == reflect.Slice
+}
+
+func isEmptyArray(v reflect.Value) bool {
+	return v.Len() == 0
+}
+
+func getMongoDocument(array reflect.Value) *Document {
+	firstItem := array.Index(0)
+	document := firstItem.FieldByName("Document")
+	return document.Addr().Interface().(*Document)
 }
